@@ -47,10 +47,3 @@ jobs:
               git commit -m "Updated CSWeb to Version ${{ env.CSPRO_LATEST_VERSION }}"
               git push
           fi
-
-      - name: Notify Chat
-        run: |
-          if [ "${{ env.UPDATE }}" = "true" ]; then
-              curl "${{ secrets.TELEGRAM_CHAT_URL }}" \
-                  --data-urlencode "text=CSWeb downloaded to version ${{ env.CSPRO_LATEST_VERSION }} in Github Repo. Ready to release new docker image"
-          fi

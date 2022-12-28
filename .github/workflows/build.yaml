@@ -47,8 +47,4 @@ jobs:
             version=${{ steps.tag.outputs.tag }}
           tags: ${{ env.REGISTRY }}/${{ env.REPO }}:${{ steps.tag.outputs.tag }}, ${{ env.REGISTRY }}/${{ env.REPO }}:latest
 
-      # DONE
-      - name: Notify Chat
-        run: curl "${{ secrets.TELEGRAM_CHAT_URL }}" \ 
-                --data-urlencode "text=CSWeb Docker updated to version ${{ steps.tag.outputs.tag }}. Pushing update to server"
 ##########
