@@ -1,0 +1,63 @@
+# Auto update csweb
+
+name: Update CSWeb
+on: push
+
+jobs:
+
+  # JOB 1
+  update:
+    name: Check for CSPro Updates
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Check for updates
+        run: |
+          HTML=$( curl -s ${{ secrets.CSPRO_WEBSITE_URL }} )
+          NEW_VERSION=$( echo "$HTML" | grep "uscb-document-number-text" | grep -Eo '([0-9]+.[0-9]+.[0-9]+|[0-9]+.[0-9]+)' )
+          CURR_VERSION=$( cat csweb-version )
+          LATEST_VERSION=$( printf "$CURR_VERSION\n$NEW_VERSION" | sort -Vr | head -n1 )
+          if [ "$LATEST_VERSION" = "$CURR_VERSION" ]; then
+              echo "CSWeb is up to date"
+          else
+              echo "UPDATE=true" >>${GITHUB_ENV}
+              echo "CSPRO_LATEST_VERSION=$LATEST_VERSION" >>${GITHUB_ENV}
+              echo "Needs update"              
+          fi
+
+      - name: Update if needed
+        run: |
+          if [ "${{ env.UPDATE }}" = "true" ]; then
+              wget -q ${{ secrets.CSWEB_DIRECT_DOWNLOAD_LINK }} -O csweb-new.zip
+          fi
+          echo "UPDATE=${{ env.UPDATE }}"
+          echo "CSPRO_LATEST_VERSION=${{ env.CSPRO_LATEST_VERSION }}"
+
+      - name: Commit changes
+        run: |
+          if [ "${{ env.UPDATE }}" = "true" ]; then
+              git config --global user.name '${{ github.actor }}'
+              git config --global user.email '${{ github.actor }}@users.noreply.github.com'
+              rm csweb.zip
+              git add -A
+              git commit -m "New Updates ${{ env.CSPRO_LATEST_VERSION }}"
+              mv csweb-new.zip csweb.zip
+              git add -A
+              git commit -m "Updated CSWeb to Version ${{ env.CSPRO_LATEST_VERSION }}"
+              git push
+          fi
+          
+
+  # JOB 2
+  build:
+    name: Trigger Docker Build
+    needs: update
+    if: ${{ needs.update.outputs.UPDATE == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Trigger
+        run: echo "CSPRO Latest Version ${{ needs.update.outputs.CSPRO_LATEST_VERSION }}"
