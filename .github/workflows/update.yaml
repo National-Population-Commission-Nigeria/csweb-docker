@@ -10,9 +10,8 @@ on:
 
 jobs:
 
-  # JOB 1
   update:
-    name: Check for CSPro Updates
+    name: Update CSWeb
     runs-on: ubuntu-latest
     steps:
 
