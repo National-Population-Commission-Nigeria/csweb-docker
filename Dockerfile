@@ -25,12 +25,6 @@ RUN set -eux; \
     chown -R www-data:www-data /var/www/html; \
     rm csweb.zip
 
-ARG MYSQL_HOST=172.17.0.1
-ARG MYSQL_DATABASE=cspro
-ARG MYSQL_USER=cspro
-ARG MYSQL_PASSWORD=cspro
-ARG DEFAULT_TIMEZONE=UTC
-
 # Config CSWeb
 RUN set - eux; \
     echo "<?php \
