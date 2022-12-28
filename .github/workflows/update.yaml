@@ -1,7 +1,12 @@
 # Auto update csweb
 
 name: Update CSWeb
-on: push
+on:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: '0 0 * * 0'
 
 jobs:
 
@@ -25,16 +30,10 @@ jobs:
           else
               echo "UPDATE=true" >>${GITHUB_ENV}
               echo "CSPRO_LATEST_VERSION=$LATEST_VERSION" >>${GITHUB_ENV}
-              echo "Needs update"              
-          fi
-
-      - name: Update if needed
-        run: |
-          if [ "${{ env.UPDATE }}" = "true" ]; then
+              echo "Needs update"
               wget -q ${{ secrets.CSWEB_DIRECT_DOWNLOAD_LINK }} -O csweb-new.zip
+              echo "$NEW_VERSION" > csweb-version
           fi
-          echo "UPDATE=${{ env.UPDATE }}"
-          echo "CSPRO_LATEST_VERSION=${{ env.CSPRO_LATEST_VERSION }}"
 
       - name: Commit changes
         run: |
@@ -49,17 +48,5 @@ jobs:
               git commit -m "Updated CSWeb to Version ${{ env.CSPRO_LATEST_VERSION }}"
               git push
           fi
-          
-
-  # JOB 2
-  build:
-    name: Trigger Docker Build
-    needs: update
-    if: ${{ needs.update.outputs.UPDATE == 'true' }}
-    runs-on: ubuntu-latest
-    steps:
-
-      - name: Trigger
-        run: echo "CSPRO Latest Version ${{ needs.update.outputs.CSPRO_LATEST_VERSION }}"
-
-#
+  
+  
