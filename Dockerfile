@@ -28,5 +28,10 @@ RUN set -eux; \
 # Config CSWeb
 COPY setup.sh ./
 
+
+# PORTS
+EXPOSE 80
+EXPOSE 443
+
 # Start
 CMD bash ./setup.sh
